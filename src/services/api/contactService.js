@@ -13,6 +13,25 @@ class ContactService {
     });
   }
 
+// Transform database field names to UI-expected property names
+  transformContactData(rawContact) {
+    if (!rawContact) return null;
+    
+    return {
+      Id: rawContact.Id,
+      firstName: rawContact.first_name_c || '',
+      lastName: rawContact.last_name_c || '',
+      email: rawContact.email_c || '',
+      phone: rawContact.phone_c || '',
+      company: rawContact.company_c || '',
+      jobTitle: rawContact.job_title_c || '',
+      accountId: rawContact.account_id_c,
+      relationshipLevel: rawContact.relationship_level_c || '',
+      lastInteraction: rawContact.last_interaction_c || new Date().toISOString(),
+      notes: rawContact.notes_c || ''
+    };
+  }
+
   async getAll() {
     try {
       const params = {
@@ -38,14 +57,16 @@ class ContactService {
         return [];
       }
       
-      return response.data || [];
+      // Transform the raw data to expected UI format
+      const transformedData = (response.data || []).map(contact => this.transformContactData(contact));
+      return transformedData;
     } catch (error) {
       console.error("Error fetching contacts:", error?.response?.data?.message || error);
       return [];
     }
   }
 
-  async getById(id) {
+async getById(id) {
     try {
       const params = {
         fields: [
@@ -69,7 +90,8 @@ class ContactService {
         return null;
       }
       
-      return response.data;
+      // Transform the raw data to expected UI format
+      return this.transformContactData(response.data);
     } catch (error) {
       console.error(`Error fetching contact ${id}:`, error?.response?.data?.message || error);
       return null;
@@ -197,7 +219,7 @@ class ContactService {
 
   async getByAccount(accountId) {
     try {
-      const params = {
+const params = {
         fields: [
           {"field": {"Name": "Name"}},
           {"field": {"Name": "first_name_c"}},
@@ -221,7 +243,9 @@ class ContactService {
         return [];
       }
       
-      return response.data || [];
+      // Transform the raw data to expected UI format
+      const transformedData = (response.data || []).map(contact => this.transformContactData(contact));
+      return transformedData;
     } catch (error) {
       console.error("Error fetching contacts by account:", error?.response?.data?.message || error);
       return [];

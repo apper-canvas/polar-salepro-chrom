@@ -114,12 +114,12 @@ const Contacts = () => {
     }
   };
 
-  const filteredContacts = contacts.filter(contact => {
+const filteredContacts = contacts.filter(contact => {
     const matchesSearch = 
-      contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.company.toLowerCase().includes(searchTerm.toLowerCase());
+      (contact.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.lastName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.company || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRelationship = selectedRelationship === "All" || contact.relationshipLevel === selectedRelationship;
     return matchesSearch && matchesRelationship;
   });
