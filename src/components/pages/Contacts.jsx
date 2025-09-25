@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
+import React, { useEffect, useState } from "react";
+import { format, isValid } from "date-fns";
 import { toast } from "react-toastify";
-import Layout from "@/components/organisms/Layout";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
+import contactService from "@/services/api/contactService";
+import ApperIcon from "@/components/ApperIcon";
 import SearchBar from "@/components/molecules/SearchBar";
 import FormField from "@/components/molecules/FormField";
 import Modal from "@/components/molecules/Modal";
 import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import ApperIcon from "@/components/ApperIcon";
-import contactService from "@/services/api/contactService";
+import Error from "@/components/ui/Error";
+import Layout from "@/components/organisms/Layout";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
+import Card from "@/components/atoms/Card";
 
 const Contacts = () => {
   const [contacts, setContacts] = useState([]);
@@ -209,8 +209,12 @@ const filteredContacts = contacts.filter(contact => {
                             Account ID: {contact.accountId}
                           </p>
                           <p className="text-sm text-gray-600 mt-1">
-                            <ApperIcon name="Calendar" className="inline h-4 w-4 mr-2" />
-                            Last: {format(new Date(contact.lastInteraction), "MMM d, yyyy")}
+<ApperIcon name="Calendar" className="inline h-4 w-4 mr-2" />
+                            Last: {(() => {
+                              if (!contact.lastInteraction) return "Never";
+                              const date = new Date(contact.lastInteraction);
+                              return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
+                            })()}
                           </p>
                         </div>
                       </div>

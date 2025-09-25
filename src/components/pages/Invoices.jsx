@@ -125,7 +125,7 @@ const Invoices = () => {
     try {
       const invoiceData = {
         ...formData,
-        dueDate: new Date(formData.dueDate).toISOString()
+dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null
       };
 
       if (selectedInvoice) {
@@ -178,7 +178,7 @@ dueDate: (() => {
     try {
       const updateData = { status: newStatus };
       if (newStatus === "Paid") {
-        updateData.paymentDate = new Date().toISOString();
+updateData.paymentDate = new Date().toISOString();
       }
       
       await invoiceService.update(invoiceId, updateData);
@@ -309,6 +309,7 @@ dueDate: (() => {
                           <p className="text-xs text-gray-500 mb-1">Due Date</p>
                           <p className="text-sm font-medium text-gray-900">
 {(() => {
+                              if (!invoice.dueDate) return "No due date";
                               const date = new Date(invoice.dueDate);
                               return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
                             })()}
@@ -336,10 +337,11 @@ dueDate: (() => {
                         
                         <div className="text-right text-xs text-gray-400">
 <p>Issued: {(() => {
+                            if (!invoice.issueDate) return "No issue date";
                             const date = new Date(invoice.issueDate);
                             return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
                           })()}</p>
-                          {invoice.paymentDate && (() => {
+{invoice.paymentDate && (() => {
                             const date = new Date(invoice.paymentDate);
                             return isValid(date) && (
                               <p>Paid: {format(date, "MMM d, yyyy")}</p>

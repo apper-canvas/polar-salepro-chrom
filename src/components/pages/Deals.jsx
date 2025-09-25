@@ -260,7 +260,8 @@ expectedCloseDate: (() => {
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <p className="text-xs text-gray-500 mb-1">Expected Close</p>
 <p className="text-sm font-medium text-gray-900">
-                            {(() => {
+{(() => {
+                              if (!deal.expectedCloseDate) return "Not set";
                               const date = new Date(deal.expectedCloseDate);
                               return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
                             })()}

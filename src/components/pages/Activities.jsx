@@ -70,7 +70,7 @@ const Activities = () => {
       dealId: "",
       subject: "",
       description: "",
-      date: new Date().toISOString().slice(0, 16),
+date: new Date().toISOString().slice(0, 16),
       duration: "",
       outcome: "Pending"
     });
@@ -81,8 +81,8 @@ const Activities = () => {
     e.preventDefault();
     try {
       const activityData = {
-        ...formData,
-        date: new Date(formData.date).toISOString(),
+...formData,
+        date: formData.date ? new Date(formData.date).toISOString() : new Date().toISOString(),
         duration: parseInt(formData.duration) || 0
       };
 
@@ -110,6 +110,7 @@ const Activities = () => {
       subject: activity.subject,
       description: activity.description,
 date: (() => {
+        if (!activity.date) return "";
         const date = new Date(activity.date);
         return isValid(date) ? date.toISOString().slice(0, 16) : "";
       })(),
@@ -274,6 +275,7 @@ date: (() => {
                               <p className="text-sm text-gray-600">
                                 <ApperIcon name="Clock" className="inline h-4 w-4 mr-2" />
 {(() => {
+                                  if (!activity.date) return "No date";
                                   const date = new Date(activity.date);
                                   return isValid(date) ? format(date, "MMM d, yyyy 'at' h:mm a") : "Invalid date";
                                 })()}

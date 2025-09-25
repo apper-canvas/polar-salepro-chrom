@@ -65,16 +65,16 @@ const Pipeline = () => {
       const updateData = { 
         stage: newStage,
         probability: stageProbabilityMap[newStage] || 0,
-        stageUpdatedAt: new Date().toISOString()
+stageUpdatedAt: new Date().toISOString()
       };
       
       // If moving to Closed Won or Closed Lost, update status and actual close date
       if (newStage === "Closed Won") {
         updateData.status = "Won";
-        updateData.actualCloseDate = new Date().toISOString();
+updateData.actualCloseDate = new Date().toISOString();
       } else if (newStage === "Closed Lost") {
         updateData.status = "Lost";
-        updateData.actualCloseDate = new Date().toISOString();
+updateData.actualCloseDate = new Date().toISOString();
       } else if (newStage !== "Closed Won" && newStage !== "Closed Lost") {
         updateData.status = "Open";
         updateData.actualCloseDate = null;
@@ -259,6 +259,7 @@ const Pipeline = () => {
                               <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
                                 <span>
 Close: {(() => {
+                                    if (!deal.expectedCloseDate) return "Not set";
                                     const date = new Date(deal.expectedCloseDate);
                                     return isValid(date) ? format(date, "MMM d") : "Invalid date";
                                   })()}
@@ -285,6 +286,7 @@ Close: {(() => {
                               {deal.stageUpdatedAt && (
 <div className="mt-2 text-xs text-gray-400">
                                   Updated: {(() => {
+                                    if (!deal.stageUpdatedAt) return "Unknown";
                                     const date = new Date(deal.stageUpdatedAt);
                                     return isValid(date) ? format(date, "MMM d, HH:mm") : "Invalid date";
                                   })()}

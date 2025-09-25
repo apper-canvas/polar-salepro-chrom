@@ -65,8 +65,16 @@ const Dashboard = () => {
 const upcomingDeals = data.deals
     .filter(deal => deal.status === "Open")
     .sort((a, b) => {
-      const dateA = new Date(a.expectedCloseDate);
-      const dateB = new Date(b.expectedCloseDate);
+      const dateStringA = a.expectedCloseDate;
+      const dateStringB = b.expectedCloseDate;
+      
+      // Handle null/undefined/empty strings
+      if (!dateStringA && !dateStringB) return 0;
+      if (!dateStringA) return 1;
+      if (!dateStringB) return -1;
+      
+      const dateA = new Date(dateStringA);
+      const dateB = new Date(dateStringB);
       if (!isValid(dateA) && !isValid(dateB)) return 0;
       if (!isValid(dateA)) return 1;
       if (!isValid(dateB)) return -1;
@@ -177,7 +185,8 @@ const upcomingDeals = data.deals
 {activity.type}
                         </Badge>
                         <span className="text-xs text-gray-400">
-                          {(() => {
+{(() => {
+                            if (!activity.date) return "No date";
                             const date = new Date(activity.date);
                             return isValid(date) ? format(date, "MMM d, h:mm a") : "Invalid date";
                           })()}
@@ -216,6 +225,7 @@ const upcomingDeals = data.deals
                       <p className="font-medium text-gray-900">{deal.title}</p>
                       <p className="text-sm text-gray-500">
 Expected close: {(() => {
+                          if (!deal.expectedCloseDate) return "Not set";
                           const date = new Date(deal.expectedCloseDate);
                           return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
                         })()}
