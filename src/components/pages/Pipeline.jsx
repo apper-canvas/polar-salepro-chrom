@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { toast } from "react-toastify";
 import Layout from "@/components/organisms/Layout";
 import Card from "@/components/atoms/Card";
@@ -258,7 +258,10 @@ const Pipeline = () => {
 
                               <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
                                 <span>
-                                  Close: {format(new Date(deal.expectedCloseDate), "MMM d")}
+Close: {(() => {
+                                    const date = new Date(deal.expectedCloseDate);
+                                    return isValid(date) ? format(date, "MMM d") : "Invalid date";
+                                  })()}
                                 </span>
                                 <Badge 
                                   variant={deal.status === "Open" ? "primary" : deal.status === "Won" ? "success" : "error"}
@@ -280,8 +283,11 @@ const Pipeline = () => {
 
                               {/* Stage updated indicator */}
                               {deal.stageUpdatedAt && (
-                                <div className="mt-2 text-xs text-gray-400">
-                                  Updated: {format(new Date(deal.stageUpdatedAt), "MMM d, HH:mm")}
+<div className="mt-2 text-xs text-gray-400">
+                                  Updated: {(() => {
+                                    const date = new Date(deal.stageUpdatedAt);
+                                    return isValid(date) ? format(date, "MMM d, HH:mm") : "Invalid date";
+                                  })()}
                                 </div>
                               )}
                             </div>

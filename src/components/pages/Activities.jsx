@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { toast } from "react-toastify";
 import Layout from "@/components/organisms/Layout";
 import Card from "@/components/atoms/Card";
@@ -109,7 +109,10 @@ const Activities = () => {
       dealId: activity.dealId || "",
       subject: activity.subject,
       description: activity.description,
-      date: new Date(activity.date).toISOString().slice(0, 16),
+date: (() => {
+        const date = new Date(activity.date);
+        return isValid(date) ? date.toISOString().slice(0, 16) : "";
+      })(),
       duration: activity.duration.toString(),
       outcome: activity.outcome
     });
@@ -270,7 +273,10 @@ const Activities = () => {
                             <div>
                               <p className="text-sm text-gray-600">
                                 <ApperIcon name="Clock" className="inline h-4 w-4 mr-2" />
-                                {format(new Date(activity.date), "MMM d, yyyy 'at' h:mm a")}
+{(() => {
+                                  const date = new Date(activity.date);
+                                  return isValid(date) ? format(date, "MMM d, yyyy 'at' h:mm a") : "Invalid date";
+                                })()}
                               </p>
                               {activity.duration > 0 && (
                                 <p className="text-sm text-gray-600 mt-1">

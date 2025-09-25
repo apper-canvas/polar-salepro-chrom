@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import dealService from "@/services/api/dealService";
@@ -124,7 +124,11 @@ const Deals = () => {
       value: deal.value.toString(),
       probability: deal.probability,
       stage: deal.stage,
-      expectedCloseDate: deal.expectedCloseDate ? deal.expectedCloseDate.split('T')[0] : "",
+expectedCloseDate: (() => {
+        if (!deal.expectedCloseDate) return "";
+        const date = new Date(deal.expectedCloseDate);
+        return isValid(date) ? deal.expectedCloseDate.split('T')[0] : "";
+      })(),
       notes: deal.notes || "",
       products: deal.products || []
     });
@@ -255,8 +259,11 @@ const Deals = () => {
                         </div>
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <p className="text-xs text-gray-500 mb-1">Expected Close</p>
-                          <p className="text-sm font-medium text-gray-900">
-                            {format(new Date(deal.expectedCloseDate), "MMM d, yyyy")}
+<p className="text-sm font-medium text-gray-900">
+                            {(() => {
+                              const date = new Date(deal.expectedCloseDate);
+                              return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
+                            })()}
                           </p>
                         </div>
                       </div>
@@ -274,10 +281,14 @@ const Deals = () => {
                           </Badge>
                         </div>
                         
-                        {deal.actualCloseDate && (
-                          <p className="text-xs text-gray-400">
-                            Closed: {format(new Date(deal.actualCloseDate), "MMM d, yyyy")}
-                          </p>
+{deal.actualCloseDate && (() => {
+                          const date = new Date(deal.actualCloseDate);
+                          return isValid(date) && (
+                            <p className="text-xs text-gray-400">
+                              Closed: {format(date, "MMM d, yyyy")}
+                            </p>
+                          );
+                        })()}
                         )}
                       </div>
 

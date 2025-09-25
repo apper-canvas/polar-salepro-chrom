@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import Layout from "@/components/organisms/Layout";
 import StatCard from "@/components/molecules/StatCard";
 import Card from "@/components/atoms/Card";
@@ -62,9 +62,16 @@ const Dashboard = () => {
   const pendingInvoices = data.invoices.filter(invoice => invoice.status === "Pending").length;
   
   const recentActivities = data.activities.slice(0, 5);
-  const upcomingDeals = data.deals
+const upcomingDeals = data.deals
     .filter(deal => deal.status === "Open")
-    .sort((a, b) => new Date(a.expectedCloseDate) - new Date(b.expectedCloseDate))
+    .sort((a, b) => {
+      const dateA = new Date(a.expectedCloseDate);
+      const dateB = new Date(b.expectedCloseDate);
+      if (!isValid(dateA) && !isValid(dateB)) return 0;
+      if (!isValid(dateA)) return 1;
+      if (!isValid(dateB)) return -1;
+      return dateA - dateB;
+    })
     .slice(0, 5);
 
   const pipelineData = {
@@ -167,10 +174,13 @@ const Dashboard = () => {
                       <p className="text-sm text-gray-500 truncate">{activity.description}</p>
                       <div className="flex items-center space-x-2 mt-1">
 <Badge variant={activity.type?.toLowerCase() || 'default'}>
-                          {activity.type}
+{activity.type}
                         </Badge>
                         <span className="text-xs text-gray-400">
-                          {format(new Date(activity.date), "MMM d, h:mm a")}
+                          {(() => {
+                            const date = new Date(activity.date);
+                            return isValid(date) ? format(date, "MMM d, h:mm a") : "Invalid date";
+                          })()}
                         </span>
                       </div>
                     </div>
@@ -205,7 +215,10 @@ const Dashboard = () => {
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{deal.title}</p>
                       <p className="text-sm text-gray-500">
-                        Expected close: {format(new Date(deal.expectedCloseDate), "MMM d, yyyy")}
+Expected close: {(() => {
+                          const date = new Date(deal.expectedCloseDate);
+                          return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
+                        })()}
                       </p>
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge variant={deal.stage.toLowerCase().replace(" ", "")}>

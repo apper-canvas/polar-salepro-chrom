@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { toast } from "react-toastify";
 import Layout from "@/components/organisms/Layout";
 import Card from "@/components/atoms/Card";
@@ -148,7 +148,11 @@ const Invoices = () => {
     setFormData({
       contactId: invoice.contactId,
       dealId: invoice.dealId || "",
-      dueDate: invoice.dueDate ? invoice.dueDate.split('T')[0] : "",
+dueDate: (() => {
+        if (!invoice.dueDate) return "";
+        const date = new Date(invoice.dueDate);
+        return isValid(date) ? invoice.dueDate.split('T')[0] : "";
+      })(),
       lineItems: invoice.lineItems || [{ description: "", quantity: 1, unitPrice: "", total: 0 }],
       subtotal: invoice.subtotal,
       taxAmount: invoice.taxAmount,
@@ -304,7 +308,10 @@ const Invoices = () => {
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <p className="text-xs text-gray-500 mb-1">Due Date</p>
                           <p className="text-sm font-medium text-gray-900">
-                            {format(new Date(invoice.dueDate), "MMM d, yyyy")}
+{(() => {
+                              const date = new Date(invoice.dueDate);
+                              return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
+                            })()}
                           </p>
                         </div>
                       </div>
@@ -328,10 +335,16 @@ const Invoices = () => {
                         </div>
                         
                         <div className="text-right text-xs text-gray-400">
-                          <p>Issued: {format(new Date(invoice.issueDate), "MMM d, yyyy")}</p>
-                          {invoice.paymentDate && (
-                            <p>Paid: {format(new Date(invoice.paymentDate), "MMM d, yyyy")}</p>
-                          )}
+<p>Issued: {(() => {
+                            const date = new Date(invoice.issueDate);
+                            return isValid(date) ? format(date, "MMM d, yyyy") : "Invalid date";
+                          })()}</p>
+                          {invoice.paymentDate && (() => {
+                            const date = new Date(invoice.paymentDate);
+                            return isValid(date) && (
+                              <p>Paid: {format(date, "MMM d, yyyy")}</p>
+                            );
+                          })()}
                         </div>
                       </div>
 
