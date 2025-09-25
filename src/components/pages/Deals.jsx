@@ -289,7 +289,6 @@ expectedCloseDate: (() => {
                             </p>
                           );
                         })()}
-                        )}
                       </div>
 
                       {deal.products && deal.products.length > 0 && (
