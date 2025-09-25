@@ -1,74 +1,294 @@
-import activitiesData from "@/services/mockData/activities.json";
-
 class ActivityService {
   constructor() {
-    this.activities = [...activitiesData];
+    this.tableName = 'activity_c';
+    this.apperClient = null;
+    this.initializeClient();
+  }
+
+  initializeClient() {
+    const { ApperClient } = window.ApperSDK;
+    this.apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
   }
 
   async getAll() {
-    await this.delay();
-    return [...this.activities].sort((a, b) => new Date(b.date) - new Date(a.date));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "duration_c"}},
+          {"field": {"Name": "outcome_c"}}
+        ],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities:", error?.response?.data?.message || error);
+      return [];
+    }
   }
 
   async getById(id) {
-    await this.delay();
-    return this.activities.find(activity => activity.Id === parseInt(id));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "duration_c"}},
+          {"field": {"Name": "outcome_c"}}
+        ]
+      };
+      
+      const response = await this.apperClient.getRecordById(this.tableName, id, params);
+      
+      if (!response?.data) {
+        return null;
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching activity ${id}:`, error?.response?.data?.message || error);
+      return null;
+    }
   }
 
   async create(activityData) {
-    await this.delay();
-    const newActivity = {
-      ...activityData,
-      Id: Math.max(...this.activities.map(a => a.Id)) + 1,
-      date: new Date().toISOString()
-    };
-    this.activities.push(newActivity);
-    return { ...newActivity };
+    try {
+      const params = {
+        records: [{
+          Name: activityData.subject,
+          type_c: activityData.type,
+          contact_id_c: parseInt(activityData.contactId),
+          deal_id_c: activityData.dealId ? parseInt(activityData.dealId) : null,
+          subject_c: activityData.subject,
+          description_c: activityData.description,
+          date_c: activityData.date,
+          duration_c: parseInt(activityData.duration) || 0,
+          outcome_c: activityData.outcome
+        }]
+      };
+
+      // Remove null fields
+      Object.keys(params.records[0]).forEach(key => {
+        if (params.records[0][key] === null) {
+          delete params.records[0][key];
+        }
+      });
+      
+      const response = await this.apperClient.createRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+      
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} activities:`, JSON.stringify(failed));
+        }
+        
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error creating activity:", error?.response?.data?.message || error);
+      return null;
+    }
   }
 
   async update(id, updateData) {
-    await this.delay();
-    const index = this.activities.findIndex(activity => activity.Id === parseInt(id));
-    if (index !== -1) {
-      this.activities[index] = { ...this.activities[index], ...updateData };
-      return { ...this.activities[index] };
+    try {
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: updateData.subject,
+          type_c: updateData.type,
+          contact_id_c: updateData.contactId ? parseInt(updateData.contactId) : undefined,
+          deal_id_c: updateData.dealId ? parseInt(updateData.dealId) : undefined,
+          subject_c: updateData.subject,
+          description_c: updateData.description,
+          date_c: updateData.date,
+          duration_c: updateData.duration ? parseInt(updateData.duration) : undefined,
+          outcome_c: updateData.outcome
+        }]
+      };
+
+      // Remove undefined fields
+      Object.keys(params.records[0]).forEach(key => {
+        if (params.records[0][key] === undefined) {
+          delete params.records[0][key];
+        }
+      });
+      
+      const response = await this.apperClient.updateRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+      
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} activities:`, JSON.stringify(failed));
+        }
+        
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error updating activity:", error?.response?.data?.message || error);
+      return null;
     }
-    throw new Error("Activity not found");
   }
 
   async delete(id) {
-    await this.delay();
-    const index = this.activities.findIndex(activity => activity.Id === parseInt(id));
-    if (index !== -1) {
-      const deleted = this.activities.splice(index, 1)[0];
-      return { ...deleted };
+    try {
+      const params = { 
+        RecordIds: [parseInt(id)]
+      };
+      
+      const response = await this.apperClient.deleteRecord(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return false;
+      }
+      
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} activities:`, JSON.stringify(failed));
+        }
+        
+        return successful.length > 0;
+      }
+    } catch (error) {
+      console.error("Error deleting activity:", error?.response?.data?.message || error);
+      return false;
     }
-    throw new Error("Activity not found");
   }
 
   async getByContact(contactId) {
-    await this.delay();
-    return this.activities
-      .filter(activity => activity.contactId === contactId)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "duration_c"}},
+          {"field": {"Name": "outcome_c"}}
+        ],
+        where: [{"FieldName": "contact_id_c", "Operator": "ExactMatch", "Values": [parseInt(contactId)]}],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities by contact:", error?.response?.data?.message || error);
+      return [];
+    }
   }
 
   async getByDeal(dealId) {
-    await this.delay();
-    return this.activities
-      .filter(activity => activity.dealId === dealId)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "duration_c"}},
+          {"field": {"Name": "outcome_c"}}
+        ],
+        where: [{"FieldName": "deal_id_c", "Operator": "ExactMatch", "Values": [parseInt(dealId)]}],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities by deal:", error?.response?.data?.message || error);
+      return [];
+    }
   }
 
   async getByType(type) {
-    await this.delay();
-    return this.activities
-      .filter(activity => activity.type === type)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }
-
-  async delay() {
-    return new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "type_c"}},
+          {"field": {"Name": "contact_id_c"}},
+          {"field": {"Name": "deal_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "duration_c"}},
+          {"field": {"Name": "outcome_c"}}
+        ],
+        where: [{"FieldName": "type_c", "Operator": "ExactMatch", "Values": [type]}],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}]
+      };
+      
+      const response = await this.apperClient.fetchRecords(this.tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching activities by type:", error?.response?.data?.message || error);
+      return [];
+    }
   }
 }
 

@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
+import { useSelector } from 'react-redux';
 import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
+import { AuthContext } from "../../App";
 
 const Header = ({ onMenuClick, title }) => {
+  const { logout } = useContext(AuthContext);
+  const { user } = useSelector((state) => state.user);
+  
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 lg:ml-64">
       <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -39,10 +48,26 @@ const Header = ({ onMenuClick, title }) => {
             Settings
           </Button>
 
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleLogout}
+            className="hidden sm:flex"
+          >
+            <ApperIcon name="LogOut" className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+
           <div className="flex items-center space-x-2">
             <div className="bg-gradient-to-br from-primary-600 to-primary-700 p-2 rounded-lg shadow-lg">
               <ApperIcon name="User" className="h-5 w-5 text-white" />
             </div>
+            {user && (
+              <div className="hidden md:block">
+                <p className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</p>
+                <p className="text-xs text-gray-500">{user.emailAddress}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
