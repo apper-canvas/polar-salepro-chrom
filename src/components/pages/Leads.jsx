@@ -116,12 +116,12 @@ const Leads = () => {
     }
   };
 
-  const filteredLeads = leads.filter(lead => {
+const filteredLeads = leads.filter(lead => {
     const matchesSearch = 
-      lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.company.toLowerCase().includes(searchTerm.toLowerCase());
+      (lead.firstName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (lead.lastName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (lead.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (lead.company?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatus === "All" || lead.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
