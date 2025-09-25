@@ -122,7 +122,7 @@ const filteredLeads = leads.filter(lead => {
       (lead.lastName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (lead.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (lead.company?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === "All" || lead.status === selectedStatus;
+const matchesStatus = selectedStatus === "All" || (lead.status ?? "unknown") === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -219,7 +219,7 @@ const filteredLeads = leads.filter(lead => {
 
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center space-x-3">
-                          <Badge variant={lead.status.toLowerCase()}>
+<Badge variant={(lead.status ?? "new").toLowerCase()}>
                             {lead.status}
                           </Badge>
                           <div className="flex items-center space-x-1">
