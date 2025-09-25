@@ -166,7 +166,7 @@ const Dashboard = () => {
                       <p className="font-medium text-gray-900">{activity.subject}</p>
                       <p className="text-sm text-gray-500 truncate">{activity.description}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant={activity.type.toLowerCase()}>
+<Badge variant={activity.type?.toLowerCase() || 'default'}>
                           {activity.type}
                         </Badge>
                         <span className="text-xs text-gray-400">
